@@ -1,0 +1,86 @@
+﻿@page "/edit-game"
+@page "/edit-game/{id:int}"
+@rendermode InteractiveWebAssembly
+
+@inject IGameService GameService
+
+
+@if (Id.HasValue)
+{
+    <h3>Edit @game.Name</h3>
+}
+else
+{
+    <h3>Create Game</h3>
+}
+
+
+<EditForm Model="game" OnValidSubmit="HandleSubmit">
+<DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="game.Name"  />
+    </div>
+
+    <div class="form-group">
+        <label for="name">Description</label>
+        <InputText id="description" class="form-control" @bind-Value="game.Description" />
+    </div>
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert alert-success" role="alert">
+            @Message
+        </div>
+    }
+    <div>
+        <span></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+    if (Id.HasValue)
+    {
+        <button type="button" class="btn btn-danger" @onclick="DeleteGame">Delete</button>
+    }
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    [SupplyParameterFromForm]
+    Game game { get; set; } = new Game { Name = string.Empty };
+
+    private string Message { get; set; } = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id.HasValue)
+        {
+            game = await GameService.GetGameById((int)Id);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (Id.HasValue)
+        {
+            await GameService.UpdateGame((int) Id, game);
+            Message = "Game updated successfully";
+            return;
+        }
+        await GameService.AddGame(game);
+        Message = "Game added successfully";
+        game = new Game { Name = string.Empty };
+    }
+
+    private async Task DeleteGame()
+    {
+        if (Id.HasValue)
+        {
+            await GameService.DeleteGame((int)Id);
+            Message = "Game deleted successfully";
+        } 
+    }
+}
