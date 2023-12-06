@@ -39,7 +39,7 @@ else
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 
-    if (Id.HasValue)
+    @if (Id.HasValue)
     {
         <button type="button" class="btn btn-danger" @onclick="DeleteGame">Delete</button>
     }
